@@ -207,36 +207,36 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const addTableRow = () => {
     if (selectedTable) {
       const tbody = selectedTable.querySelector('tbody') || selectedTable;
-      const newRow = document.createElement('tr');
+        const newRow = document.createElement('tr');
       const colCount = selectedTable.rows[0]?.cells.length || 3;
-      
-      for (let i = 0; i < colCount; i++) {
-        const cell = document.createElement('td');
+        
+        for (let i = 0; i < colCount; i++) {
+          const cell = document.createElement('td');
         cell.style.cssText = 'padding: 12px; border: 1px solid #ddd; text-align: left;';
         cell.className = 'editor-cell';
         cell.contentEditable = 'true';
-        cell.textContent = `New Content ${i + 1}`;
-        newRow.appendChild(cell);
-      }
-      
-      tbody.appendChild(newRow);
-      handleEditorChange();
+          cell.textContent = `New Content ${i + 1}`;
+          newRow.appendChild(cell);
+        }
+        
+        tbody.appendChild(newRow);
+        handleEditorChange();
     }
   };
 
   const addTableColumn = () => {
     if (selectedTable) {
       const rows = selectedTable.rows;
-      for (let i = 0; i < rows.length; i++) {
-        const cell = document.createElement(i === 0 ? 'th' : 'td');
-        cell.style.cssText = i === 0 
+        for (let i = 0; i < rows.length; i++) {
+          const cell = document.createElement(i === 0 ? 'th' : 'td');
+          cell.style.cssText = i === 0 
           ? 'padding: 12px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; text-align: center;'
           : 'padding: 12px; border: 1px solid #ddd; text-align: left;';
         cell.className = 'editor-cell';
         cell.contentEditable = 'true';
-        cell.textContent = i === 0 ? `Header ${rows[i].cells.length + 1}` : `Content ${rows[i].cells.length + 1}`;
-        rows[i].appendChild(cell);
-      }
+          cell.textContent = i === 0 ? `Header ${rows[i].cells.length + 1}` : `Content ${rows[i].cells.length + 1}`;
+          rows[i].appendChild(cell);
+        }
       handleEditorChange();
     }
   };

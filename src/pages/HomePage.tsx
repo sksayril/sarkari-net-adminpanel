@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import ApiService, { 
   MainCategory, 
-  CreateMainCategoryRequest, 
+  CreateMainCategoryRequest,
+  UpdateMainCategoryRequest,
   SubCategory, 
   CreateSubCategoryRequest, 
   UpdateSubCategoryRequest,
@@ -38,7 +39,10 @@ import AddSubCategoryModal from '../components/AddSubCategoryModal';
 import EditSubCategoryModal from '../components/EditSubCategoryModal';
 import AddTopDataModal from '../components/AddTopDataModal';
 import HomeContentModal from '../components/HomeContentModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import EditMainCategoryModal from '../components/EditMainCategoryModal';
 import Notification from '../components/Notification';
+import toast from 'react-hot-toast';
 
 
 
@@ -93,12 +97,28 @@ const HomePage: React.FC = () => {
       setError('');
       const response = await ApiService.getSubCategories();
       setSubCategories(response.subCategories);
+      setFilteredSubCategories(response.subCategories);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to load sub categories');
     } finally {
       setIsLoadingSubCategories(false);
     }
   };
+
+  // Filter sub categories by main category
+  const filterSubCategoriesByMainCategory = (mainCategoryId: string) => {
+    setSelectedMainCategoryFilter(mainCategoryId);
+    if (mainCategoryId === 'all') {
+      setFilteredSubCategories(subCategories);
+    } else {
+      const filtered = subCategories.filter(
+        subCategory => subCategory.mainCategory._id === mainCategoryId
+      );
+      setFilteredSubCategories(filtered);
+    }
+  };
+
+
 
   const handleCreateSubCategory = async (categoryData: CreateSubCategoryRequest) => {
     try {
@@ -159,6 +179,27 @@ const HomePage: React.FC = () => {
     setShowEditSubCategoryModal(true);
   };
 
+  const handleDeleteSubCategory = async (id: string) => {
+    try {
+      setIsDeletingSubCategory(true);
+      setError('');
+      await ApiService.deleteSubCategory(id);
+      await loadSubCategories();
+      toast.success('Sub category deleted successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete sub category';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsDeletingSubCategory(false);
+    }
+  };
+
+  const showDeleteSubCategoryConfirmation = (subCategory: SubCategory) => {
+    setItemToDelete({ id: subCategory._id, name: subCategory.contentTitle, type: 'sub-category' });
+    setShowDeleteSubCategoryModal(true);
+  };
+
   // Top Data CRUD functions
   const handleCreateTopData = async (data: CreateTopDataRequest) => {
     try {
@@ -167,19 +208,11 @@ const HomePage: React.FC = () => {
       await ApiService.createTopData(data);
       await loadTopData();
       setShowAddTopDataModal(false);
-      setNotification({
-        type: 'success',
-        message: 'Top data created successfully!',
-        isVisible: true
-      });
+      toast.success('Top data created successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create top data';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsCreatingTopData(false);
@@ -196,19 +229,11 @@ const HomePage: React.FC = () => {
       await loadTopData();
       setShowEditTopDataModal(false);
       setSelectedTopData(null);
-      setNotification({
-        type: 'success',
-        message: 'Top data updated successfully!',
-        isVisible: true
-      });
+      toast.success('Top data updated successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update top data';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsUpdatingTopData(false);
@@ -216,29 +241,24 @@ const HomePage: React.FC = () => {
   };
 
   const handleDeleteTopData = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this top data?')) return;
-    
     try {
       setIsDeletingTopData(true);
       setError('');
       await ApiService.deleteTopData(id);
       await loadTopData();
-      setNotification({
-        type: 'success',
-        message: 'Top data deleted successfully!',
-        isVisible: true
-      });
+      toast.success('Top data deleted successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete top data';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
     } finally {
       setIsDeletingTopData(false);
     }
+  };
+
+  const showDeleteTopDataConfirmation = (topData: TopData) => {
+    setItemToDelete({ id: topData._id, name: topData.contentTitle, type: 'top-data' });
+    setShowDeleteTopDataModal(true);
   };
 
   const handleEditTopData = (topData: TopData) => {
@@ -254,19 +274,11 @@ const HomePage: React.FC = () => {
       await ApiService.createHomeContent(data);
       await loadHomeContent();
       setShowAddHomeContentModal(false);
-      setNotification({
-        type: 'success',
-        message: 'Home content created successfully!',
-        isVisible: true
-      });
+      toast.success('Home content created successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create home content';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsCreatingHomeContent(false);
@@ -283,19 +295,11 @@ const HomePage: React.FC = () => {
       await loadHomeContent();
       setShowEditHomeContentModal(false);
       setSelectedHomeContent(null);
-      setNotification({
-        type: 'success',
-        message: 'Home content updated successfully!',
-        isVisible: true
-      });
+      toast.success('Home content updated successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update home content';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsUpdatingHomeContent(false);
@@ -303,29 +307,24 @@ const HomePage: React.FC = () => {
   };
 
   const handleDeleteHomeContent = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this home content?')) return;
-    
     try {
       setIsDeletingHomeContent(true);
       setError('');
       await ApiService.deleteHomeContent(id);
       await loadHomeContent();
-      setNotification({
-        type: 'success',
-        message: 'Home content deleted successfully!',
-        isVisible: true
-      });
+      toast.success('Home content deleted successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete home content';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
+      toast.error(errorMessage);
     } finally {
       setIsDeletingHomeContent(false);
     }
+  };
+
+  const showDeleteHomeContentConfirmation = (homeContent: HomeContent) => {
+    setItemToDelete({ id: homeContent._id, name: homeContent.title, type: 'home-content' });
+    setShowDeleteHomeContentModal(true);
   };
 
   const handleEditHomeContent = (homeContent: HomeContent) => {
@@ -351,26 +350,42 @@ const HomePage: React.FC = () => {
       setIsCreatingCategory(true);
       setError('');
       await ApiService.createMainCategory(categoryData);
-      // Reload categories after successful creation
       await loadMainCategories();
-      // Show success notification
-      setNotification({
-        type: 'success',
-        message: 'Main category created successfully!',
-        isVisible: true
-      });
+      toast.success('Main category created successfully!');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create main category';
       setError(errorMessage);
-      setNotification({
-        type: 'error',
-        message: errorMessage,
-        isVisible: true
-      });
-      throw error; // Re-throw to keep modal open
+      toast.error(errorMessage);
+      throw error;
     } finally {
       setIsCreatingCategory(false);
     }
+  };
+
+  const handleUpdateMainCategory = async (categoryData: UpdateMainCategoryRequest) => {
+    if (!selectedCategory) return;
+    
+    try {
+      setIsUpdatingCategory(true);
+      setError('');
+      await ApiService.updateMainCategory(selectedCategory._id, categoryData);
+      await loadMainCategories();
+      setShowEditCategoryModal(false);
+      setSelectedCategory(null);
+      toast.success('Main category updated successfully!');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update main category';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      throw error;
+    } finally {
+      setIsUpdatingCategory(false);
+    }
+  };
+
+  const handleEditMainCategory = (category: MainCategory) => {
+    setSelectedCategory(category);
+    setShowEditCategoryModal(true);
   };
 
 
@@ -378,7 +393,10 @@ const HomePage: React.FC = () => {
   const [mainCategories, setMainCategories] = useState<MainCategory[]>([]);
   const [isLoadingMainCategories, setIsLoadingMainCategories] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
   const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+  const [showEditCategoryModal, setShowEditCategoryModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<MainCategory | null>(null);
   const [error, setError] = useState('');
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
@@ -391,12 +409,27 @@ const HomePage: React.FC = () => {
   });
 
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
+  const [filteredSubCategories, setFilteredSubCategories] = useState<SubCategory[]>([]);
+  const [selectedMainCategoryFilter, setSelectedMainCategoryFilter] = useState<string>('all');
   const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
   const [isCreatingSubCategory, setIsCreatingSubCategory] = useState(false);
   const [showAddSubCategoryModal, setShowAddSubCategoryModal] = useState(false);
   const [isUpdatingSubCategory, setIsUpdatingSubCategory] = useState(false);
+  const [isDeletingSubCategory, setIsDeletingSubCategory] = useState(false);
   const [showEditSubCategoryModal, setShowEditSubCategoryModal] = useState(false);
   const [selectedSubCategory, setSelectedSubCategory] = useState<SubCategory | null>(null);
+
+  // Update filtered list when subCategories or mainCategories change
+  useEffect(() => {
+    if (selectedMainCategoryFilter === 'all') {
+      setFilteredSubCategories(subCategories);
+    } else {
+      const filtered = subCategories.filter(
+        subCategory => subCategory.mainCategory._id === selectedMainCategoryFilter
+      );
+      setFilteredSubCategories(filtered);
+    }
+  }, [subCategories, selectedMainCategoryFilter]);
 
   // Top Data state
   const [topDataList, setTopDataList] = useState<TopData[]>([]);
@@ -417,6 +450,12 @@ const HomePage: React.FC = () => {
   const [showAddHomeContentModal, setShowAddHomeContentModal] = useState(false);
   const [showEditHomeContentModal, setShowEditHomeContentModal] = useState(false);
   const [selectedHomeContent, setSelectedHomeContent] = useState<HomeContent | null>(null);
+
+  // Delete confirmation modals
+  const [showDeleteTopDataModal, setShowDeleteTopDataModal] = useState(false);
+  const [showDeleteHomeContentModal, setShowDeleteHomeContentModal] = useState(false);
+  const [showDeleteSubCategoryModal, setShowDeleteSubCategoryModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string; type: 'top-data' | 'home-content' | 'sub-category' } | null>(null);
 
   return (
     <div className="space-y-6">
@@ -598,7 +637,7 @@ const HomePage: React.FC = () => {
                               Edit
                             </button>
                             <button 
-                              onClick={() => handleDeleteHomeContent(item._id)}
+                              onClick={() => showDeleteHomeContentConfirmation(item)}
                               disabled={isDeletingHomeContent}
                               className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 disabled:opacity-50"
                             >
@@ -627,7 +666,7 @@ const HomePage: React.FC = () => {
                   <Plus className="w-4 h-4" />
                   Add Top Data
                 </button>
-              </div>
+      </div>
 
               {/* Error Message */}
               {error && (
@@ -642,7 +681,7 @@ const HomePage: React.FC = () => {
                   <p className="text-gray-600">Loading top data...</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+              <div className="space-y-4">
                   {topDataList.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
                       No top data found. Create your first top data!
@@ -650,7 +689,7 @@ const HomePage: React.FC = () => {
                   ) : (
                     topDataList.map((item) => (
                       <div key={item._id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="flex justify-between items-start mb-3">
+                    <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
                               <div 
@@ -664,16 +703,16 @@ const HomePage: React.FC = () => {
                             </p>
                             <p className="text-sm text-gray-500">
                               Created by {item.createdBy.name} on {new Date(item.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
+                        </p>
+                      </div>
+                <span className={`px-2 py-1 text-xs rounded-full ${
                             item.isActive 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
                             {item.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
+                </span>
+              </div>
                         
                         <div className="mb-3">
                           <p className="text-gray-700 line-clamp-2">{item.metaDescription}</p>
@@ -698,30 +737,30 @@ const HomePage: React.FC = () => {
                             <Palette className="w-4 h-4 text-gray-400" />
                             <span className="text-xs text-gray-500 font-mono">{item.colorCode}</span>
                           </div>
-                          <div className="flex gap-2">
+              <div className="flex gap-2">
                             <button 
                               onClick={() => handleEditTopData(item)}
                               className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
                             >
                               <Edit3 className="w-3 h-3" />
-                              Edit
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteTopData(item._id)}
+                  Edit
+                </button>
+                                                        <button 
+                              onClick={() => showDeleteTopDataConfirmation(item)}
                               disabled={isDeletingTopData}
                               className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 disabled:opacity-50"
                             >
                               <Trash2 className="w-3 h-3" />
                               Delete
                             </button>
-                          </div>
-                        </div>
+              </div>
+            </div>
                       </div>
                     ))
                   )}
-                </div>
+        </div>
               )}
-            </div>
+      </div>
           )}
 
           {/* Main Categories Tab */}
@@ -771,10 +810,13 @@ const HomePage: React.FC = () => {
                             Created: {new Date(category.createdAt).toLocaleDateString()}
                           </span>
                         </div>
-              <div className="flex gap-2">
-                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                  Edit
-                </button>
+                                      <div className="flex gap-2">
+                          <button 
+                            onClick={() => handleEditMainCategory(category)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            Edit
+                          </button>
                           <button className="text-green-600 hover:text-green-800 text-sm font-medium">
                             View Sub-categories
                           </button>
@@ -801,6 +843,80 @@ const HomePage: React.FC = () => {
                 </button>
               </div>
 
+              {/* Main Category Tabs */}
+              <div className="bg-white border border-gray-200 rounded-lg">
+                <div className="border-b border-gray-200">
+                  <nav className="flex space-x-8 px-6">
+                    <button
+                      onClick={() => filterSubCategoriesByMainCategory('all')}
+                      className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                        selectedMainCategoryFilter === 'all'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Folder className="w-4 h-4" />
+                        All Categories
+                        <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                          {subCategories.length}
+                        </span>
+                      </div>
+                    </button>
+                    {mainCategories.map((category) => {
+                      const categorySubCount = subCategories.filter(
+                        sub => sub.mainCategory._id === category._id
+                      ).length;
+                      return (
+                        <button
+                          key={category._id}
+                          onClick={() => filterSubCategoriesByMainCategory(category._id)}
+                          className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                            selectedMainCategoryFilter === category._id
+                              ? 'border-blue-500 text-blue-600'
+                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FolderOpen className="w-4 h-4" />
+                            {category.title}
+                            <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                              {categorySubCount}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+                
+                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm font-medium text-gray-700">
+                        {selectedMainCategoryFilter === 'all' 
+                          ? 'All Sub Categories' 
+                          : mainCategories.find(cat => cat._id === selectedMainCategoryFilter)?.title + ' Sub Categories'
+                        }
+                      </span>
+                      <span className="text-sm text-gray-500">
+                        Showing {filteredSubCategories.length} sub categories
+                      </span>
+                    </div>
+                    {selectedMainCategoryFilter !== 'all' && (
+                      <div className="text-sm text-blue-600">
+                        <button
+                          onClick={() => filterSubCategoriesByMainCategory('all')}
+                          className="hover:text-blue-800 transition-colors"
+                        >
+                          View All Categories
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Error Message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -815,30 +931,69 @@ const HomePage: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {subCategories.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      No sub categories found. Create your first sub category!
+                  {filteredSubCategories.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <FolderOpen className="w-8 h-8 text-gray-400" />
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        {selectedMainCategoryFilter === 'all' 
+                          ? 'No Sub Categories Found'
+                          : 'No Sub Categories in This Category'
+                        }
+                      </h3>
+                      <p className="text-gray-500 mb-4">
+                        {selectedMainCategoryFilter === 'all' 
+                          ? 'Get started by creating your first sub category.'
+                          : `No sub categories found in "${mainCategories.find(cat => cat._id === selectedMainCategoryFilter)?.title}".`
+                        }
+                      </p>
+                      <button 
+                        onClick={() => setShowAddSubCategoryModal(true)}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 mx-auto"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Sub Category
+                      </button>
                     </div>
                   ) : (
-                    subCategories.map((subCategory) => (
+                    filteredSubCategories.map((subCategory) => (
                       <div key={subCategory._id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                         <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <h4 className="font-semibold text-gray-900">{subCategory.contentTitle}</h4>
-                            <p className="text-sm text-blue-600 mt-1">
-                              Parent: {subCategory.mainCategory.title}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Meta: {subCategory.metaTitle}
-                            </p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <FolderOpen className="w-4 h-4 text-blue-600" />
+                              <h4 className="font-semibold text-gray-900">{subCategory.contentTitle}</h4>
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                  <Folder className="w-3 h-3" />
+                                  {subCategory.mainCategory.title}
+                                </span>
+                                <span className="text-xs text-gray-400">•</span>
+                                <span className="text-xs text-gray-500">
+                                  {new Date(subCategory.createdAt).toLocaleDateString()}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">Meta:</span> {subCategory.metaTitle}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                <span className="font-medium">Created by:</span> {subCategory.createdBy.name}
+                              </p>
+                            </div>
                           </div>
                           <div className="text-right">
-                            <span className="text-xs text-gray-500">
-                              Created by {subCategory.createdBy.name}
-                            </span>
+                            <div className="flex items-center gap-1 text-xs text-gray-400">
+                              <span>Sub Category</span>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-gray-700 mb-3 line-clamp-2">{subCategory.metaDescription}</p>
+                        
+                        <div className="mb-3">
+                          <p className="text-gray-700 text-sm line-clamp-2">{subCategory.metaDescription}</p>
+                        </div>
                         
                         {/* Keywords and Tags */}
                         <div className="flex flex-wrap gap-2 mb-3">
@@ -852,20 +1007,35 @@ const HomePage: React.FC = () => {
                               {tag}
                             </span>
                           ))}
+                          {(subCategory.keywords.length > 3 || subCategory.tags.length > 3) && (
+                            <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
+                              +{Math.max(0, subCategory.keywords.length - 3) + Math.max(0, subCategory.tags.length - 3)} more
+                            </span>
+                          )}
                         </div>
                         
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-500">
-                            Created: {new Date(subCategory.createdAt).toLocaleDateString()}
-                          </span>
+                        <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">Sub Category</span>
+                            <span className="text-xs text-gray-500">•</span>
+                            <span className="text-xs text-gray-500">
+                              {subCategory.keywords.length} keywords, {subCategory.tags.length} tags
+                            </span>
+                          </div>
                           <div className="flex gap-2">
                             <button 
                               onClick={() => handleEditSubCategory(subCategory)}
-                              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                              className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
                             >
+                              <Edit3 className="w-3 h-3" />
                               Edit
                             </button>
-                            <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                            <button 
+                              onClick={() => showDeleteSubCategoryConfirmation(subCategory)}
+                              disabled={isDeletingSubCategory}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-3 h-3" />
                               Delete
                             </button>
                           </div>
@@ -886,6 +1056,19 @@ const HomePage: React.FC = () => {
         onClose={() => setShowAddCategoryModal(false)}
         onSubmit={handleCreateMainCategory}
         isLoading={isCreatingCategory}
+      />
+
+      {/* Edit Main Category Modal */}
+      <EditMainCategoryModal
+        isOpen={showEditCategoryModal}
+        onClose={() => {
+          setShowEditCategoryModal(false);
+          setSelectedCategory(null);
+        }}
+        onSubmit={handleUpdateMainCategory}
+        isLoading={isUpdatingCategory}
+        category={selectedCategory}
+        error={error}
       />
 
       {/* Add Sub Category Modal */}
@@ -961,6 +1144,60 @@ const HomePage: React.FC = () => {
         isLoading={isUpdatingHomeContent}
         homeContent={selectedHomeContent}
         error={error}
+      />
+
+      {/* Delete Top Data Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteTopDataModal}
+        onClose={() => {
+          setShowDeleteTopDataModal(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={async () => {
+          if (itemToDelete?.type === 'top-data') {
+            await handleDeleteTopData(itemToDelete.id);
+          }
+        }}
+        title="Top Data"
+        message="Are you sure you want to delete this top data? This action cannot be undone."
+        itemName={itemToDelete?.name}
+        isLoading={isDeletingTopData}
+      />
+
+      {/* Delete Home Content Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteHomeContentModal}
+        onClose={() => {
+          setShowDeleteHomeContentModal(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={async () => {
+          if (itemToDelete?.type === 'home-content') {
+            await handleDeleteHomeContent(itemToDelete.id);
+          }
+        }}
+        title="Home Content"
+        message="Are you sure you want to delete this home content? This action cannot be undone."
+        itemName={itemToDelete?.name}
+        isLoading={isDeletingHomeContent}
+      />
+
+      {/* Delete Sub Category Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteSubCategoryModal}
+        onClose={() => {
+          setShowDeleteSubCategoryModal(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={async () => {
+          if (itemToDelete?.type === 'sub-category') {
+            await handleDeleteSubCategory(itemToDelete.id);
+          }
+        }}
+        title="Sub Category"
+        message="Are you sure you want to delete this sub category? This action cannot be undone."
+        itemName={itemToDelete?.name}
+        isLoading={isDeletingSubCategory}
       />
 
       {/* Notification */}

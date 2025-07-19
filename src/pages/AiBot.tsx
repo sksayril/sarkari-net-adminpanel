@@ -111,7 +111,7 @@ const AiBot: React.FC = () => {
             >
               <Plus className="w-4 h-4" />
               Create System Prompt
-            </button>
+          </button>
           )}
         </div>
       </div>
@@ -142,7 +142,7 @@ const AiBot: React.FC = () => {
             </div>
           ) : systemPrompt ? (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Status</span>
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                   systemPrompt.isActive 
@@ -156,9 +156,9 @@ const AiBot: React.FC = () => {
               <div>
                 <p className="text-sm font-medium text-gray-900 mb-2">Description</p>
                 <p className="text-sm text-gray-700">{systemPrompt.description}</p>
-              </div>
-              
-              <div>
+      </div>
+
+                <div>
                 <p className="text-sm font-medium text-gray-900 mb-2">System Prompt</p>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <p className="text-xs text-gray-700 font-mono">{systemPrompt.systemPrompt}</p>
@@ -167,8 +167,8 @@ const AiBot: React.FC = () => {
               
               <div className="text-xs text-gray-500">
                 Created by {systemPrompt.createdBy.name} on {new Date(systemPrompt.createdAt).toLocaleDateString()}
-              </div>
-              
+          </div>
+
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={handleDeleteSystemPrompt}
@@ -179,7 +179,7 @@ const AiBot: React.FC = () => {
                   Delete
                 </button>
               </div>
-            </div>
+          </div>
           ) : (
             <div className="text-center py-8">
               <Bot className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -199,8 +199,8 @@ const AiBot: React.FC = () => {
               <div className="flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-red-700">{systemPromptError}</p>
-              </div>
             </div>
+          </div>
           )}
         </div>
 

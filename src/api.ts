@@ -1,6 +1,7 @@
 // API Configuration
 // export const API_BASE_URL = 'https://7cvccltb-3110.inc1.devtunnels.ms';
-export const API_BASE_URL = 'https://api.dhanlaxmii.com';
+// export const API_BASE_URL = 'https://api.dhanlaxmii.com';
+export const API_BASE_URL = 'http://localhost:3119';
 
 // Types for API responses
 export interface AdminLoginRequest {
@@ -71,12 +72,23 @@ export interface CreateMainCategoryRequest {
   title: string;
 }
 
+export interface UpdateMainCategoryRequest {
+  title?: string;
+  isActive?: boolean;
+}
+
 export interface CreateMainCategoryResponse {
   message: string;
   category: {
     id: string;
     title: string;
   };
+}
+
+export interface UpdateMainCategoryResponse {
+  success: boolean;
+  message: string;
+  data: MainCategory;
 }
 
 export interface GetMainCategoriesResponse {
@@ -140,6 +152,11 @@ export interface CreateSubCategoryResponse {
 
 export interface GetSubCategoriesResponse {
   subCategories: SubCategory[];
+}
+
+export interface DeleteSubCategoryResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface ApiError {
@@ -443,6 +460,13 @@ export class ApiService {
     });
   }
 
+  static async updateMainCategory(id: string, categoryData: UpdateMainCategoryRequest): Promise<UpdateMainCategoryResponse> {
+    return this.request<UpdateMainCategoryResponse>(`/admin/categories/main/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(categoryData),
+    });
+  }
+
   // Sub Category Management
   static async createSubCategory(categoryData: CreateSubCategoryRequest): Promise<CreateSubCategoryResponse> {
     return this.request<CreateSubCategoryResponse>('/admin/categories/sub', {
@@ -461,6 +485,12 @@ export class ApiService {
     return this.request<CreateSubCategoryResponse>(`/admin/categories/sub/${id}`, {
       method: 'PUT',
       body: JSON.stringify(categoryData),
+    });
+  }
+
+  static async deleteSubCategory(id: string): Promise<DeleteSubCategoryResponse> {
+    return this.request<DeleteSubCategoryResponse>(`/admin/categories/sub/${id}`, {
+      method: 'DELETE',
     });
   }
 
