@@ -1,7 +1,7 @@
 // API Configuration
 // export const API_BASE_URL = 'https://7cvccltb-3110.inc1.devtunnels.ms';
-// export const API_BASE_URL = 'https://api.dhanlaxmii.com';
-export const API_BASE_URL = 'http://localhost:3119';
+export const API_BASE_URL = 'https://api.dhanlaxmii.com';
+// export const API_BASE_URL = 'http://localhost:3119';
 
 // Types for API responses
 export interface AdminLoginRequest {
