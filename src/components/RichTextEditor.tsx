@@ -34,7 +34,8 @@ import {
   Minimize2,
   Move,
   RotateCw,
-  Download
+  Download,
+  Tag
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -43,6 +44,8 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   rows?: number;
+  defaultMetaTitle?: string;
+  defaultMetaDescription?: string;
 }
 
 interface LinkData {
@@ -59,12 +62,19 @@ interface ImageData {
   style: string;
 }
 
+interface MetaData {
+  title: string;
+  description: string;
+}
+
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
   value,
   onChange,
   placeholder = "Enter content here...",
   className = "",
-  rows = 12
+  rows = 20,
+  defaultMetaTitle = "SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025",
+  defaultMetaDescription = "SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates"
 }) => {
   const [isPreview, setIsPreview] = useState(false);
   const [showToolbar, setShowToolbar] = useState(true);
@@ -106,6 +116,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [showTableContextMenu, setShowTableContextMenu] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [selectedCell, setSelectedCell] = useState<HTMLTableCellElement | null>(null);
+  const [showFullHTMLDialog, setShowFullHTMLDialog] = useState(false);
+  const [fullHTMLContent, setFullHTMLContent] = useState('');
+  const [showMetaDialog, setShowMetaDialog] = useState(false);
+  const [showMetaNotification, setShowMetaNotification] = useState(false);
+  const [metaData, setMetaData] = useState<MetaData>({
+    title: defaultMetaTitle,
+    description: defaultMetaDescription
+  });
   const editorRef = useRef<HTMLDivElement>(null);
   const lastSelectionRef = useRef<Range | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -172,7 +190,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   };
 
   const insertTable = (rows: number, cols: number) => {
-    let tableHTML = '<table class="editor-table" style="width: 100%; border-collapse: collapse; border: 2px solid #ddd; margin: 10px 0; border-radius: 4px; overflow: hidden;">';
+    let tableHTML = '<table class="editor-table" style="width: 100%; border-collapse: collapse; border: 2px solid #ddd; margin: 10px 0; border-radius: 4px; overflow: hidden; background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">';
     
     for (let i = 0; i < rows; i++) {
       tableHTML += '<tr>';
@@ -180,9 +198,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         const isHeader = i === 0;
         const tag = isHeader ? 'th' : 'td';
         const style = isHeader 
-          ? 'padding: 12px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; text-align: center;'
-          : 'padding: 12px; border: 1px solid #ddd; text-align: left;';
-        tableHTML += `<${tag} class="editor-cell" style="${style}" contenteditable="true">${isHeader ? `Header ${j + 1}` : `Content ${j + 1}`}</${tag}>`;
+          ? 'padding: 12px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; text-align: center; cursor: pointer;'
+          : 'padding: 12px; border: 1px solid #ddd; text-align: left; cursor: pointer;';
+        tableHTML += `<${tag} class="editor-cell" style="${style}" contenteditable="true" data-editable="true">${isHeader ? `Header ${j + 1}` : `Content ${j + 1}`}</${tag}>`;
       }
       tableHTML += '</tr>';
     }
@@ -194,11 +212,16 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Enhanced table functions with context menu support
   const handleTableClick = (event: React.MouseEvent) => {
     const target = event.target as HTMLElement;
-    if (target.tagName === 'TABLE') {
-      setSelectedTable(target as HTMLTableElement);
+    
+    // Check if clicked element is a table or table cell
+    const tableElement = target.closest('table');
+    const cellElement = target.closest('td, th');
+    
+    if (tableElement) {
+      setSelectedTable(tableElement as HTMLTableElement);
       setShowTableEditor(true);
-    } else if (target.tagName === 'TD' || target.tagName === 'TH') {
-      setSelectedCell(target as HTMLTableCellElement);
+    } else if (cellElement) {
+      setSelectedCell(cellElement as HTMLTableCellElement);
       setContextMenuPosition({ x: event.clientX, y: event.clientY });
       setShowTableContextMenu(true);
     }
@@ -609,6 +632,178 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setShowHTMLDialog(false);
   };
 
+  const openFullHTMLDialog = () => {
+    setFullHTMLContent(value);
+    setShowFullHTMLDialog(true);
+  };
+
+  const saveFullHTMLContent = () => {
+    const extractedContent = extractContentFromFullHTML(fullHTMLContent);
+    
+    // Apply meta tags to the extracted content
+    const contentWithMeta = insertMetaTags(extractedContent);
+    onChange(contentWithMeta);
+    setShowFullHTMLDialog(false);
+    
+    // Update meta data from the full HTML if present
+    const extractedMeta = extractMetaTags(fullHTMLContent);
+    setMetaData(extractedMeta);
+    
+    // Enhance tables after content is applied
+    setTimeout(() => {
+      enhanceExistingTables();
+    }, 100);
+  };
+
+  const handleFullHTMLPaste = () => {
+    // Create a temporary textarea to get clipboard content
+    const textarea = document.createElement('textarea');
+    document.body.appendChild(textarea);
+    textarea.focus();
+    
+    // Request clipboard content
+    navigator.clipboard.readText().then((clipboardText) => {
+      if (clipboardText.includes('<!DOCTYPE html>') || clipboardText.includes('<html')) {
+        setFullHTMLContent(clipboardText);
+        setShowFullHTMLDialog(true);
+      } else {
+        // If not full HTML, just paste normally
+        insertHTML(clipboardText);
+      }
+      document.body.removeChild(textarea);
+    }).catch(() => {
+      document.body.removeChild(textarea);
+    });
+  };
+
+  // Function to insert meta tags into HTML content
+  const insertMetaTags = (htmlContent: string): string => {
+    // Check if it's a full HTML document
+    if (htmlContent.includes('<!DOCTYPE html>') || htmlContent.includes('<html')) {
+      // Create a temporary div to parse the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      
+      // Find or create head element
+      let headElement = tempDiv.querySelector('head');
+      if (!headElement) {
+        headElement = document.createElement('head');
+        const htmlElement = tempDiv.querySelector('html');
+        if (htmlElement) {
+          htmlElement.insertBefore(headElement, htmlElement.firstChild);
+        }
+      }
+      
+      // Update or create title tag
+      let titleElement = headElement.querySelector('title');
+      if (!titleElement) {
+        titleElement = document.createElement('title');
+        headElement.appendChild(titleElement);
+      }
+      titleElement.textContent = metaData.title;
+      
+      // Update or create meta description
+      let metaDescription = headElement.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement('meta');
+        metaDescription.setAttribute('name', 'description');
+        headElement.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute('content', metaData.description);
+      
+      return tempDiv.innerHTML;
+    }
+    
+    // If not a full HTML document, wrap it with meta tags
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${metaData.title}</title>
+    <meta name="description" content="${metaData.description}" />
+</head>
+<body>
+    ${htmlContent}
+</body>
+</html>`;
+  };
+
+  // Function to extract meta tags from HTML content
+  const extractMetaTags = (htmlContent: string): MetaData => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    const titleElement = tempDiv.querySelector('title');
+    const metaDescription = tempDiv.querySelector('meta[name="description"]');
+    
+    return {
+      title: titleElement?.textContent || defaultMetaTitle,
+      description: metaDescription?.getAttribute('content') || defaultMetaDescription
+    };
+  };
+
+  const handleMetaSubmit = () => {
+    // Apply meta tags to current content
+    const contentWithMeta = insertMetaTags(value);
+    onChange(contentWithMeta);
+    setShowMetaDialog(false);
+  };
+
+  // Function to apply default meta tags to content
+  const applyDefaultMetaTags = () => {
+    // Reset meta data to defaults
+    setMetaData({
+      title: defaultMetaTitle,
+      description: defaultMetaDescription
+    });
+    
+    // Apply meta tags to current content
+    const contentWithMeta = insertMetaTags(value);
+    onChange(contentWithMeta);
+    
+    // Show notification
+    setShowMetaNotification(true);
+    setTimeout(() => setShowMetaNotification(false), 3000);
+  };
+
+  // Function to generate complete HTML document
+  const generateCompleteHTML = () => {
+    const completeHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${metaData.title}</title>
+    <meta name="description" content="${metaData.description}" />
+    <meta name="keywords" content="Sarkari Result, Sarkari Results, Government Jobs, Sarkari Naukri, Sarkari Result 2025" />
+    <meta name="author" content="SaarkariResult.com" />
+    <meta name="robots" content="index, follow" />
+    <meta property="og:title" content="${metaData.title}" />
+    <meta property="og:description" content="${metaData.description}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://saarkariresult.com" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="${metaData.title}" />
+    <meta name="twitter:description" content="${metaData.description}" />
+</head>
+<body>
+    ${value}
+</body>
+</html>`;
+    
+    // Create a blob and download the complete HTML
+    const blob = new Blob([completeHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'sarkari-result-page.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const toolbarButtons: ToolbarButton[] = [
     { icon: Bold, command: 'bold', title: 'Bold (Ctrl+B)' },
     { icon: Italic, command: 'italic', title: 'Italic (Ctrl+I)' },
@@ -643,12 +838,116 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { separator: true },
     { icon: FileText, customAction: () => setShowCustomHTML(!showCustomHTML), title: 'Insert Custom HTML' },
     { icon: Settings, customAction: openHTMLDialog, title: 'Edit Full HTML' },
+    { icon: Download, customAction: openFullHTMLDialog, title: 'Handle Full HTML Document' },
+    { icon: ExternalLink, customAction: handleFullHTMLPaste, title: 'Paste Full HTML Document' },
+    { separator: true },
+    { icon: Tag, customAction: () => setShowMetaDialog(true), title: 'Manage Meta Tags' },
+    { icon: Save, customAction: applyDefaultMetaTags, title: 'Apply Default Meta Tags' },
+    { icon: Download, customAction: generateCompleteHTML, title: 'Download Complete HTML with Meta Tags' },
   ];
 
   const handleEditorChange = () => {
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
     }
+  };
+
+  // Function to extract content from full HTML documents
+  const extractContentFromFullHTML = (htmlContent: string): string => {
+    // Check if it's a full HTML document
+    if (htmlContent.includes('<!DOCTYPE html>') || htmlContent.includes('<html')) {
+      // Create a temporary div to parse the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      
+      // Extract content from body
+      const bodyContent = tempDiv.querySelector('body');
+      if (bodyContent) {
+        return bodyContent.innerHTML;
+      } else {
+        // If no body tag, try to extract content after head
+        const headEnd = htmlContent.indexOf('</head>');
+        if (headEnd !== -1) {
+          const bodyStart = htmlContent.indexOf('<body');
+          if (bodyStart !== -1) {
+            const bodyEnd = htmlContent.indexOf('</body>');
+            if (bodyEnd !== -1) {
+              return htmlContent.substring(bodyStart + 6, bodyEnd);
+            }
+          } else {
+            // No body tag, extract everything after head
+            return htmlContent.substring(headEnd + 7);
+          }
+        }
+      }
+    }
+    
+    // Return original content if not a full HTML document
+    return htmlContent;
+  };
+
+  // Function to enhance existing tables for better editing
+  const enhanceExistingTables = () => {
+    if (!editorRef.current) return;
+    
+    const tables = editorRef.current.querySelectorAll('table');
+    tables.forEach((table) => {
+      const tableElement = table as HTMLTableElement;
+      
+      // Add editor-table class if not present
+      if (!tableElement.classList.contains('editor-table')) {
+        tableElement.classList.add('editor-table');
+      }
+      
+      // Enhance table styling with better visibility
+      tableElement.style.cssText += '; width: 100%; border-collapse: collapse; border: 3px solid #2563eb; margin: 15px 0; border-radius: 8px; overflow: hidden; background-color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;';
+      
+      // Add table indicator
+      if (!tableElement.querySelector('.table-indicator')) {
+        const indicator = document.createElement('div');
+        indicator.className = 'table-indicator';
+        indicator.style.cssText = 'position: absolute; top: -8px; left: 10px; background: #2563eb; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; z-index: 10;';
+        indicator.textContent = '📊 TABLE - Click to Edit';
+        tableElement.style.position = 'relative';
+        tableElement.appendChild(indicator);
+      }
+      
+      // Enhance all cells
+      const cells = tableElement.querySelectorAll('td, th');
+      cells.forEach((cell) => {
+        const cellElement = cell as HTMLTableCellElement;
+        
+        // Add editor-cell class if not present
+        if (!cellElement.classList.contains('editor-cell')) {
+          cellElement.classList.add('editor-cell');
+        }
+        
+        // Make cells contenteditable
+        cellElement.setAttribute('contenteditable', 'true');
+        cellElement.setAttribute('data-editable', 'true');
+        
+        // Add cursor pointer and hover effect
+        cellElement.style.cursor = 'pointer';
+        cellElement.style.transition = 'background-color 0.2s ease';
+        
+        // Add hover effect
+        cellElement.addEventListener('mouseenter', () => {
+          cellElement.style.backgroundColor = cellElement.tagName === 'TH' ? '#e0e7ff' : '#f8fafc';
+        });
+        
+        cellElement.addEventListener('mouseleave', () => {
+          cellElement.style.backgroundColor = cellElement.tagName === 'TH' ? '#f8f9fa' : 'white';
+        });
+        
+        // Enhance cell styling
+        const isHeader = cellElement.tagName === 'TH';
+        const baseStyle = isHeader 
+          ? 'padding: 12px; border: 1px solid #ddd; background-color: #f8f9fa; font-weight: bold; text-align: center;'
+          : 'padding: 12px; border: 1px solid #ddd; text-align: left;';
+        
+        cellElement.style.cssText = baseStyle + '; cursor: pointer; transition: background-color 0.2s ease;';
+      });
+    });
   };
 
   const handleButtonClick = (button: any) => {
@@ -666,9 +965,49 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Fix cursor position issue by using a different approach
   useEffect(() => {
     if (editorRef.current && !isPreview) {
+      // Handle full HTML documents by extracting body content
+      let contentToSet = value;
+      
+      // Check if it's a full HTML document
+      if (value.includes('<!DOCTYPE html>') || value.includes('<html')) {
+        // Extract meta tags from the full HTML
+        const extractedMeta = extractMetaTags(value);
+        setMetaData(extractedMeta);
+        
+        // Create a temporary div to parse the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = value;
+        
+        // Extract content from body
+        const bodyContent = tempDiv.querySelector('body');
+        if (bodyContent) {
+          contentToSet = bodyContent.innerHTML;
+        } else {
+          // If no body tag, try to extract content after head
+          const headEnd = value.indexOf('</head>');
+          if (headEnd !== -1) {
+            const bodyStart = value.indexOf('<body');
+            if (bodyStart !== -1) {
+              const bodyEnd = value.indexOf('</body>');
+              if (bodyEnd !== -1) {
+                contentToSet = value.substring(bodyStart + 6, bodyEnd);
+              }
+            } else {
+              // No body tag, extract everything after head
+              contentToSet = value.substring(headEnd + 7);
+            }
+          }
+        }
+      }
+      
       // Only update innerHTML if it's different to prevent cursor jumping
-      if (editorRef.current.innerHTML !== value) {
-        editorRef.current.innerHTML = value;
+      if (editorRef.current.innerHTML !== contentToSet) {
+        editorRef.current.innerHTML = contentToSet;
+        
+        // Enhance existing tables after content is loaded
+        setTimeout(() => {
+          enhanceExistingTables();
+        }, 100);
       }
     }
   }, [value, isPreview]);
@@ -685,8 +1024,32 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     }
   }, [showTableContextMenu]);
 
+  // Initialize with default meta tags if content is empty
+  useEffect(() => {
+    // Always set default meta tags on component mount
+    setMetaData({
+      title: defaultMetaTitle,
+      description: defaultMetaDescription
+    });
+    
+    // If content is empty, apply default meta tags
+    if (!value || value.trim() === '') {
+      const contentWithMeta = insertMetaTags('');
+      onChange(contentWithMeta);
+    }
+  }, []); // Only run once on component mount
+
   return (
-    <div className={`border border-gray-300 rounded-lg overflow-hidden ${className}`}>
+    <div className={`border border-gray-300 rounded-lg overflow-hidden w-full max-w-6xl shadow-sm ${className}`} style={{ minHeight: '600px' }}>
+      {/* Meta Tags Notification */}
+      {showMetaNotification && (
+        <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <Tag className="w-4 h-4" />
+            <span>Default meta tags applied successfully!</span>
+          </div>
+        </div>
+      )}
       {/* Toolbar */}
       <div className="bg-gray-50 border-b border-gray-300 p-2">
         <div className="flex items-center justify-between">
@@ -713,6 +1076,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             )}
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={applyDefaultMetaTags}
+              className="p-2 bg-purple-600 text-white hover:bg-purple-700 rounded transition-colors"
+              title="Apply Default Meta Tags"
+            >
+              <Tag className="w-4 h-4" />
+            </button>
             <button
               type="button"
               onClick={toggleToolbar}
@@ -1134,6 +1505,56 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
         )}
 
+        {/* Full HTML Document Handler Dialog */}
+        {showFullHTMLDialog && (
+          <div className="mt-2 p-4 bg-white border border-gray-300 rounded-lg shadow-lg max-w-4xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-gray-900">Handle Full HTML Document</h3>
+              <button
+                onClick={() => setShowFullHTMLDialog(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Note:</strong> This tool extracts content from full HTML documents (with DOCTYPE, html, head, body tags) 
+                  and converts them to editor-friendly content. Tables and other elements will be properly recognized.
+                </p>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full HTML Document</label>
+                <textarea
+                  value={fullHTMLContent}
+                  onChange={(e) => setFullHTMLContent(e.target.value)}
+                  className="w-full h-96 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                  placeholder="Paste your full HTML document here (with DOCTYPE, html, head, body tags)..."
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={saveFullHTMLContent}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                >
+                  <Save className="w-4 h-4 mr-2 inline" />
+                  Extract & Apply Content
+                </button>
+                <button
+                  onClick={() => setShowFullHTMLDialog(false)}
+                  className="px-4 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Table Dialog */}
         {showTableDialog && (
           <div className="mt-2 p-4 bg-white border border-gray-300 rounded-lg shadow-lg">
@@ -1360,6 +1781,113 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           </div>
         )}
 
+        {/* Meta Tags Dialog */}
+        {showMetaDialog && (
+          <div className="mt-2 p-4 bg-white border border-gray-300 rounded-lg shadow-lg max-w-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-medium text-gray-900">Manage Meta Tags</h3>
+              <button
+                onClick={() => setShowMetaDialog(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Default Meta Tags Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-blue-700 mb-2">Default Meta Tags for Sarkari Result:</h4>
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <strong>Default Title:</strong> 
+                    <div className="text-blue-600 truncate">{defaultMetaTitle}</div>
+                  </div>
+                  <div>
+                    <strong>Default Description:</strong> 
+                    <div className="text-blue-600 line-clamp-2">{defaultMetaDescription}</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Meta Tags Preview */}
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Current Meta Tags Preview:</h4>
+                <div className="space-y-2 text-xs">
+                  <div>
+                    <strong>Title:</strong> 
+                    <div className="text-blue-600 truncate">{metaData.title}</div>
+                  </div>
+                  <div>
+                    <strong>Description:</strong> 
+                    <div className="text-gray-600 line-clamp-2">{metaData.description}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input
+                  type="text"
+                  value={metaData.title}
+                  onChange={(e) => setMetaData({ ...metaData, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter meta title for SEO"
+                  maxLength={60}
+                />
+                <div className="text-xs text-gray-500 mt-1">{metaData.title.length}/60 characters</div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                <textarea
+                  value={metaData.description}
+                  onChange={(e) => setMetaData({ ...metaData, description: e.target.value })}
+                  className="w-full h-24 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Enter meta description for SEO"
+                  maxLength={160}
+                />
+                <div className="text-xs text-gray-500 mt-1">{metaData.description.length}/160 characters</div>
+              </div>
+              
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={handleMetaSubmit}
+                  className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700"
+                >
+                  <Save className="w-4 h-4 mr-2 inline" />
+                  Apply Meta Tags
+                </button>
+                <button
+                  onClick={() => {
+                    setMetaData({
+                      title: defaultMetaTitle,
+                      description: defaultMetaDescription
+                    });
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
+                >
+                  <RotateCw className="w-4 h-4 mr-2 inline" />
+                  Reset to Default
+                </button>
+                <button
+                  onClick={applyDefaultMetaTags}
+                  className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700"
+                >
+                  <Save className="w-4 h-4 mr-2 inline" />
+                  Force Apply Defaults
+                </button>
+                <button
+                  onClick={() => setShowMetaDialog(false)}
+                  className="px-4 py-2 bg-gray-500 text-white text-sm rounded-lg hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Table Context Menu */}
         {showTableContextMenu && (
           <div 
@@ -1414,9 +1942,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       </div>
 
       {/* Editor/Preview Area */}
-      <div className="relative">
+      <div className="relative bg-white">
         {isPreview ? (
-          <div className="p-4 bg-white">
+          <div className="p-6 bg-white min-h-[400px]">
             <div 
               className="prose max-w-none"
               dangerouslySetInnerHTML={{ __html: value }}
@@ -1432,7 +1960,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               handleImageClick(e);
               handleTableClick(e);
             }}
-            className="p-4 min-h-[200px] focus:outline-none"
+            className="p-4 min-h-[400px] focus:outline-none"
             style={{ minHeight: `${rows * 1.5}rem` }}
             data-placeholder={placeholder}
           />
@@ -1444,7 +1972,17 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         {isPreview ? (
           <span>Preview Mode - Press Ctrl+Enter to edit</span>
         ) : (
-          <span>Edit Mode - Press Ctrl+Enter for preview | Advanced Features: Tables (click to edit), Advanced Links, Auto-format URLs, Image Editor, Custom HTML, Full HTML editor</span>
+          <div className="flex justify-between items-center">
+            <span>Edit Mode - Press Ctrl+Enter for preview | Advanced Features: Tables, Links, Images, Meta Tags</span>
+            <div className="flex items-center gap-4">
+              <span className="text-blue-600">
+                <strong>Meta:</strong> {metaData.title.substring(0, 30)}...
+              </span>
+              <span className="text-green-600">
+                <strong>Desc:</strong> {metaData.description.substring(0, 40)}...
+              </span>
+            </div>
+          </div>
         )}
       </div>
     </div>

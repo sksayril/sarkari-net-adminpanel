@@ -21,8 +21,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateSubCategoryRequest>({
     mainCategory: '',
-    metaTitle: '',
-    metaDescription: '',
+    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+    metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
     keywords: [],
     tags: [],
     contentTitle: '',
@@ -97,8 +97,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   const handleClose = () => {
     setFormData({
       mainCategory: '',
-      metaTitle: '',
-      metaDescription: '',
+      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+      metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
       keywords: [],
       tags: [],
       contentTitle: '',
@@ -152,6 +152,11 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
       e.preventDefault();
       action();
     }
+  };
+
+  const resetMetaToDefaults = () => {
+    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025');
+    handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates');
   };
 
   if (!isOpen) return null;
@@ -209,9 +214,18 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 
           {/* Meta Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Meta Title *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Title *
+              </label>
+              <button
+                type="button"
+                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025')}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Use Default
+              </button>
+            </div>
             <input
               type="text"
               value={formData.metaTitle}
@@ -233,11 +247,31 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
             </p>
           </div>
 
+          {/* Reset Both Meta Fields Button */}
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={resetMetaToDefaults}
+              className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium"
+            >
+              Reset Both Meta Fields to Defaults
+            </button>
+          </div>
+
           {/* Meta Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Meta Description *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Meta Description *
+              </label>
+              <button
+                type="button"
+                onClick={() => handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates')}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Use Default
+              </button>
+            </div>
             <textarea
               value={formData.metaDescription}
               onChange={(e) => handleInputChange('metaDescription', e.target.value)}
@@ -394,7 +428,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
               value={formData.contentDescription}
               onChange={(value) => handleInputChange('contentDescription', value)}
               placeholder="Enter content description..."
-              rows={8}
+              rows={60}
+              className="min-h-[600px]"
             />
             {errors.contentDescription && (
               <div className="flex items-center gap-1 mt-1">
