@@ -21,9 +21,11 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateSubCategoryRequest>({
     mainCategory: '',
-    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
-    metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
+    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results',
+    metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs',
     keywords: [],
+
+
     tags: [],
     contentTitle: '',
     contentDescription: ''
@@ -97,8 +99,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   const handleClose = () => {
     setFormData({
       mainCategory: '',
-      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
-      metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
+      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results,',
+      metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs,',
       keywords: [],
       tags: [],
       contentTitle: '',
@@ -155,8 +157,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   };
 
   const resetMetaToDefaults = () => {
-    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025');
-    handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates');
+    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, ');
+    handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, ');
   };
 
   if (!isOpen) return null;
@@ -220,7 +222,7 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
               </label>
               <button
                 type="button"
-                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025')}
+                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results,')}
                 className="text-xs text-blue-600 hover:text-blue-800 underline"
               >
                 Use Default
