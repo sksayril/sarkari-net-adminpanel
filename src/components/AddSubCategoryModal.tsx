@@ -21,11 +21,9 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateSubCategoryRequest>({
     mainCategory: '',
-    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results',
-    metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs',
+    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+    metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
     keywords: [],
-
-
     tags: [],
     contentTitle: '',
     contentDescription: ''
@@ -99,8 +97,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   const handleClose = () => {
     setFormData({
       mainCategory: '',
-      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results,',
-      metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs,',
+      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+      metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
       keywords: [],
       tags: [],
       contentTitle: '',
@@ -157,8 +155,8 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   };
 
   const resetMetaToDefaults = () => {
-    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, ');
-    handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, ');
+    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025');
+    handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates');
   };
 
   if (!isOpen) return null;
@@ -222,7 +220,7 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
               </label>
               <button
                 type="button"
-                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results,')}
+                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025')}
                 className="text-xs text-blue-600 hover:text-blue-800 underline"
               >
                 Use Default
@@ -430,8 +428,7 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
               value={formData.contentDescription}
               onChange={(value) => handleInputChange('contentDescription', value)}
               placeholder="Enter content description..."
-              rows={60}
-              className="min-h-[600px]"
+              rows={8}
             />
             {errors.contentDescription && (
               <div className="flex items-center gap-1 mt-1">

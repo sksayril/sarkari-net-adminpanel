@@ -371,6 +371,73 @@ export interface DeleteHomeContentResponse {
   message: string;
 }
 
+// Thumbnail Types
+export interface Thumbnail {
+  _id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  originalFileName: string;
+  fileSize: number;
+  mimeType: string;
+  url?: string;
+  isActive: boolean;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  updatedBy?: {
+    _id: string;
+    name: string;
+    email: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateThumbnailRequest {
+  image: File;
+  title: string;
+  description?: string;
+  url?: string;
+}
+
+export interface UpdateThumbnailRequest {
+  image?: File;
+  title?: string;
+  description?: string;
+  url?: string;
+  isActive?: boolean;
+}
+
+export interface CreateThumbnailResponse {
+  success: boolean;
+  message: string;
+  data: Thumbnail;
+}
+
+export interface GetThumbnailsResponse {
+  success: boolean;
+  data: Thumbnail[];
+}
+
+export interface GetThumbnailResponse {
+  success: boolean;
+  data: Thumbnail;
+}
+
+export interface UpdateThumbnailResponse {
+  success: boolean;
+  message: string;
+  data: Thumbnail;
+}
+
+export interface DeleteThumbnailResponse {
+  success: boolean;
+  message: string;
+}
+
 // API Functions
 export class ApiService {
   private static baseURL = API_BASE_URL;
@@ -589,6 +656,78 @@ export class ApiService {
 
   static async deleteHomeContent(id: string): Promise<DeleteHomeContentResponse> {
     return this.request<DeleteHomeContentResponse>(`/home-content/admin/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Thumbnail Management APIs
+  static async createThumbnail(data: CreateThumbnailRequest): Promise<CreateThumbnailResponse> {
+    const formData = new FormData();
+    formData.append('image', data.image);
+    formData.append('title', data.title);
+    if (data.description) formData.append('description', data.description);
+    if (data.url) formData.append('url', data.url);
+
+    const url = `${this.baseURL}/thumbnails/admin`;
+    const token = localStorage.getItem('adminToken');
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  static async getThumbnails(): Promise<GetThumbnailsResponse> {
+    return this.request<GetThumbnailsResponse>('/thumbnails/admin', {
+      method: 'GET',
+    });
+  }
+
+  static async getThumbnail(id: string): Promise<GetThumbnailResponse> {
+    return this.request<GetThumbnailResponse>(`/thumbnails/admin/${id}`, {
+      method: 'GET',
+    });
+  }
+
+  static async updateThumbnail(id: string, data: UpdateThumbnailRequest): Promise<UpdateThumbnailResponse> {
+    const formData = new FormData();
+    if (data.image) formData.append('image', data.image);
+    if (data.title) formData.append('title', data.title);
+    if (data.description) formData.append('description', data.description);
+    if (data.url) formData.append('url', data.url);
+    if (data.isActive !== undefined) formData.append('isActive', data.isActive.toString());
+
+    const url = `${this.baseURL}/thumbnails/admin/${id}`;
+    const token = localStorage.getItem('adminToken');
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  }
+
+  static async deleteThumbnail(id: string): Promise<DeleteThumbnailResponse> {
+    return this.request<DeleteThumbnailResponse>(`/thumbnails/admin/${id}`, {
       method: 'DELETE',
     });
   }

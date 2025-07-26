@@ -14,6 +14,7 @@ import Syllabus from './pages/Syllabus';
 import Admission from './pages/Admission';
 import Importance from './pages/Importance';
 import TopCategory from './pages/TopCategory';
+import Thumbnails from './pages/Thumbnails';
 import AiBot from './pages/AiBot';
 import ApiService from './api';
 
@@ -100,6 +101,17 @@ function App() {
                 setIsAuthenticated(false);
               }}>
                 <HomePage />
+              </AdminLayout>
+            </ProtectedRoute>
+          } />
+          
+          <Route path="/admin/thumbnails" element={
+            <ProtectedRoute>
+              <AdminLayout onLogout={() => {
+                ApiService.logout();
+                setIsAuthenticated(false);
+              }}>
+                <Thumbnails />
               </AdminLayout>
             </ProtectedRoute>
           } />

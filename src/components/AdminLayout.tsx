@@ -17,7 +17,8 @@ import {
   LogOut,
   Bell,
   Settings,
-  Bot
+  Bot,
+  Image
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -33,6 +34,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, onLogout }) => {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/employees', icon: Users, label: 'Employees' },
     { path: '/admin/homepage', icon: Home, label: 'Home Page' },
+    { path: '/admin/thumbnails', icon: Image, label: 'Thumbnails' },
     // { path: '/admin/latest-jobs', icon: Briefcase, label: 'Latest Jobs' },
     // { path: '/admin/results', icon: FileText, label: 'Results' },
     // { path: '/admin/admit-cards', icon: CreditCard, label: 'Admit Cards' },

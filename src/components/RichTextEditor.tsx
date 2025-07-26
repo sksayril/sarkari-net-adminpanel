@@ -35,7 +35,9 @@ import {
   Move,
   RotateCw,
   Download,
-  Tag
+  Tag,
+  Code2,
+  Split
 } from 'lucide-react';
 
 interface RichTextEditorProps {
@@ -73,8 +75,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   placeholder = "Enter content here...",
   className = "",
   rows = 20,
-  defaultMetaTitle = "SaarkariResult.com : Sarkari Result 2025",
-  defaultMetaDescription = "SaarkariResult.com for Sarkari Result, Sarkari Result jobs,"
+  defaultMetaTitle = "SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025",
+  defaultMetaDescription = "SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates"
 }) => {
   const [isPreview, setIsPreview] = useState(false);
   const [showToolbar, setShowToolbar] = useState(true);
@@ -120,6 +122,10 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [fullHTMLContent, setFullHTMLContent] = useState('');
   const [showMetaDialog, setShowMetaDialog] = useState(false);
   const [showMetaNotification, setShowMetaNotification] = useState(false);
+  const [showHTMLCode, setShowHTMLCode] = useState(false);
+  const [showSplitView, setShowSplitView] = useState(false);
+  const [showLivePreview, setShowLivePreview] = useState(false);
+  const [htmlCode, setHtmlCode] = useState('');
   const [metaData, setMetaData] = useState<MetaData>({
     title: defaultMetaTitle,
     description: defaultMetaDescription
@@ -804,6 +810,41 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     URL.revokeObjectURL(url);
   };
 
+  // Function to toggle HTML code view
+  const toggleHTMLCode = () => {
+    if (!showHTMLCode) {
+      setHtmlCode(value);
+    }
+    setShowHTMLCode(!showHTMLCode);
+    setShowSplitView(false);
+  };
+
+  // Function to toggle split view
+  const toggleSplitView = () => {
+    if (!showSplitView) {
+      setHtmlCode(value);
+    }
+    setShowSplitView(!showSplitView);
+    setShowHTMLCode(false);
+    setShowLivePreview(false);
+  };
+
+  // Function to toggle live preview
+  const toggleLivePreview = () => {
+    setShowLivePreview(!showLivePreview);
+  };
+
+  // Function to apply HTML code changes
+  const applyHTMLCode = () => {
+    onChange(htmlCode);
+    setShowHTMLCode(false);
+  };
+
+  // Function to sync HTML code with editor content
+  const syncHTMLCode = () => {
+    setHtmlCode(value);
+  };
+
   const toolbarButtons: ToolbarButton[] = [
     { icon: Bold, command: 'bold', title: 'Bold (Ctrl+B)' },
     { icon: Italic, command: 'italic', title: 'Italic (Ctrl+I)' },
@@ -841,6 +882,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     { icon: Download, customAction: openFullHTMLDialog, title: 'Handle Full HTML Document' },
     { icon: ExternalLink, customAction: handleFullHTMLPaste, title: 'Paste Full HTML Document' },
     { separator: true },
+    { icon: Code2, customAction: toggleHTMLCode, title: 'Toggle HTML Code View' },
+    { icon: Split, customAction: toggleSplitView, title: 'Toggle Split View (Visual + HTML)' },
+    { separator: true },
     { icon: Tag, customAction: () => setShowMetaDialog(true), title: 'Manage Meta Tags' },
     { icon: Save, customAction: applyDefaultMetaTags, title: 'Apply Default Meta Tags' },
     { icon: Download, customAction: generateCompleteHTML, title: 'Download Complete HTML with Meta Tags' },
@@ -848,7 +892,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const handleEditorChange = () => {
     if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
+      const newValue = editorRef.current.innerHTML;
+      onChange(newValue);
+      
+      // Auto-sync HTML code if in split view
+      if (showSplitView) {
+        setHtmlCode(newValue);
+      }
     }
   };
 
@@ -1950,6 +2000,150 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               dangerouslySetInnerHTML={{ __html: value }}
             />
           </div>
+        ) : showHTMLCode ? (
+          <div className="flex flex-col h-full">
+            {/* HTML Code Editor */}
+            <div className="flex-1 p-4 bg-gray-900 text-green-400">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-green-300">HTML Code Editor</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={syncHTMLCode}
+                    className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                    title="Sync with Visual Editor"
+                  >
+                    <RotateCw className="w-3 h-3 mr-1 inline" />
+                    Sync
+                  </button>
+                  <button
+                    onClick={applyHTMLCode}
+                    className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                    title="Apply HTML Changes"
+                  >
+                    <Save className="w-3 h-3 mr-1 inline" />
+                    Apply
+                  </button>
+                  <button
+                    onClick={toggleHTMLCode}
+                    className="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700"
+                    title="Close HTML Editor"
+                  >
+                    <X className="w-3 h-3 mr-1 inline" />
+                    Close
+                  </button>
+                </div>
+              </div>
+              <textarea
+                value={htmlCode}
+                onChange={(e) => setHtmlCode(e.target.value)}
+                className="w-full h-96 bg-gray-800 text-green-400 border border-gray-700 rounded-lg p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                placeholder="Edit HTML code here..."
+                spellCheck={false}
+              />
+            </div>
+          </div>
+        ) : showSplitView ? (
+          <div className="flex h-full">
+            {/* Visual Editor (Left Side) */}
+            <div className="flex-1 border-r border-gray-300">
+              <div className="p-4 bg-gray-50 border-b border-gray-300">
+                <h3 className="text-sm font-medium text-gray-700">Visual Editor</h3>
+              </div>
+              <div
+                ref={editorRef}
+                contentEditable
+                onInput={handleEditorChange}
+                onKeyDown={handleKeyDown}
+                onClick={(e) => {
+                  handleImageClick(e);
+                  handleTableClick(e);
+                }}
+                className="p-4 min-h-[400px] focus:outline-none"
+                style={{ minHeight: `${rows * 1.5}rem` }}
+                data-placeholder={placeholder}
+              />
+            </div>
+            
+            {/* HTML Code Editor (Right Side) */}
+            <div className="flex-1 bg-gray-900 text-green-400">
+              <div className="p-4 bg-gray-800 border-b border-gray-600">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-green-300">HTML Code</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={syncHTMLCode}
+                      className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                      title="Sync with Visual Editor"
+                    >
+                      <RotateCw className="w-3 h-3 mr-1 inline" />
+                      Sync
+                    </button>
+                    <button
+                      onClick={applyHTMLCode}
+                      className="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                      title="Apply HTML Changes"
+                    >
+                      <Save className="w-3 h-3 mr-1 inline" />
+                      Apply
+                    </button>
+                    <button
+                      onClick={toggleLivePreview}
+                      className={`px-3 py-1 text-xs rounded ${
+                        showLivePreview 
+                          ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                          : 'bg-gray-600 text-white hover:bg-gray-700'
+                      }`}
+                      title="Toggle Live Preview"
+                    >
+                      <Eye className="w-3 h-3 mr-1 inline" />
+                      {showLivePreview ? 'Hide' : 'Live'} Preview
+                    </button>
+                    <button
+                      onClick={toggleSplitView}
+                      className="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700"
+                      title="Close Split View"
+                    >
+                      <X className="w-3 h-3 mr-1 inline" />
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+              {showLivePreview ? (
+                <div className="flex flex-col h-full">
+                  {/* Live Preview (Top) */}
+                  <div className="flex-1 bg-white border-b border-gray-600">
+                    <div className="p-4 bg-gray-100 border-b border-gray-300">
+                      <h4 className="text-sm font-medium text-gray-700">Live Preview</h4>
+                    </div>
+                    <div 
+                      className="p-4 prose max-w-none"
+                      dangerouslySetInnerHTML={{ __html: htmlCode }}
+                    />
+                  </div>
+                  {/* HTML Code (Bottom) */}
+                  <div className="flex-1">
+                    <textarea
+                      value={htmlCode}
+                      onChange={(e) => setHtmlCode(e.target.value)}
+                      className="w-full h-full bg-gray-900 text-green-400 border-none p-4 font-mono text-sm focus:outline-none resize-none"
+                      placeholder="Edit HTML code here..."
+                      spellCheck={false}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <textarea
+                  value={htmlCode}
+                  onChange={(e) => setHtmlCode(e.target.value)}
+                  className="w-full h-full bg-gray-900 text-green-400 border-none p-4 font-mono text-sm focus:outline-none resize-none"
+                  placeholder="Edit HTML code here..."
+                  spellCheck={false}
+                  style={{ minHeight: `${rows * 1.5}rem` }}
+                />
+              )}
+            </div>
+          </div>
         ) : (
           <div
             ref={editorRef}
@@ -1971,9 +2165,33 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
       <div className="bg-gray-50 border-t border-gray-300 px-4 py-2 text-xs text-gray-500">
         {isPreview ? (
           <span>Preview Mode - Press Ctrl+Enter to edit</span>
+        ) : showHTMLCode ? (
+          <div className="flex justify-between items-center">
+            <span>HTML Code Editor Mode - Edit HTML directly | Press Apply to update visual editor</span>
+            <div className="flex items-center gap-4">
+              <span className="text-green-600">
+                <strong>HTML:</strong> {htmlCode.length} characters
+              </span>
+              <span className="text-blue-600">
+                <strong>Meta:</strong> {metaData.title.substring(0, 30)}...
+              </span>
+            </div>
+          </div>
+        ) : showSplitView ? (
+          <div className="flex justify-between items-center">
+            <span>Split View Mode - Visual Editor (Left) | HTML Code (Right) | Real-time editing</span>
+            <div className="flex items-center gap-4">
+              <span className="text-green-600">
+                <strong>HTML:</strong> {htmlCode.length} characters
+              </span>
+              <span className="text-blue-600">
+                <strong>Meta:</strong> {metaData.title.substring(0, 30)}...
+              </span>
+            </div>
+          </div>
         ) : (
           <div className="flex justify-between items-center">
-            <span>Edit Mode - Press Ctrl+Enter for preview | Advanced Features: Tables, Links, Images, Meta Tags</span>
+            <span>Visual Editor Mode - Press Ctrl+Enter for preview | Advanced Features: Tables, Links, Images, Meta Tags, HTML Code Editor</span>
             <div className="flex items-center gap-4">
               <span className="text-blue-600">
                 <strong>Meta:</strong> {metaData.title.substring(0, 30)}...
