@@ -21,10 +21,64 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<CreateSubCategoryRequest>({
     mainCategory: '',
-    metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+    metaTitle: 'Sarkari Result 2025 | Sarkari Result Jobs',
     metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
-    keywords: [],
-    tags: [],
+    keywords: [
+      'sarkari result',
+      'sarkari result.com',
+      'sarkari result 2025',
+      'saarkariresult',
+      'sarkari result.in',
+      'sarkari results 2025',
+      'sarkariresult',
+      'Sarkari Result',
+      'Sarkari Results',
+      'Sarkari Result 2025',
+      'Sarkari Naukri',
+      'Sarkari Job',
+      'Government Jobs 2025',
+      'Free Job Alert 2025',
+      'saarkariresult.com Sarkari Naukri',
+      'saarkariresult.com Sarkari Result',
+      'Bank Recruitment 2025',
+      'Railway Recruitment 2025',
+      'saarkariresult.com',
+      'Sarkari Exam Portal',
+      'saarkariresult.com Admit Card',
+      'saarkariresult.com Answer Keys',
+      'SSC Recruitment 2025',
+      'UPSC Exam Notifications 2025',
+      'Police Recruitment 2025',
+      'Defence Recruitment 2025'
+    ],
+    tags: [
+      'sarkari result',
+      'sarkari result.com',
+      'sarkari result 2025',
+      'saarkariresult',
+      'sarkari result.in',
+      'sarkari results 2025',
+      'sarkariresult',
+      'Sarkari Result',
+      'Sarkari Results',
+      'Sarkari Result 2025',
+      'Sarkari Naukri',
+      'Sarkari Job',
+      'Government Jobs 2025',
+      'Free Job Alert 2025',
+      'saarkariresult.com Sarkari Naukri',
+      'saarkariresult.com Sarkari Result',
+      'Bank Recruitment 2025',
+      'Railway Recruitment 2025',
+      'saarkariresult.com',
+      'Sarkari Exam Portal',
+      'saarkariresult.com Admit Card',
+      'saarkariresult.com Answer Keys',
+      'SSC Recruitment 2025',
+      'UPSC Exam Notifications 2025',
+      'Police Recruitment 2025',
+      'Defence Recruitment 2025'
+    ],
     contentTitle: '',
     contentDescription: ''
   });
@@ -97,10 +151,64 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   const handleClose = () => {
     setFormData({
       mainCategory: '',
-      metaTitle: 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025',
+      metaTitle: 'Sarkari Result 2025 | Sarkari Result Jobs',
       metaDescription: 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates',
-      keywords: [],
-      tags: [],
+      keywords: [
+        'sarkari result',
+        'sarkari result.com',
+        'sarkari result 2025',
+        'saarkariresult',
+        'sarkari result.in',
+        'sarkari results 2025',
+        'sarkariresult',
+        'Sarkari Result',
+        'Sarkari Results',
+        'Sarkari Result 2025',
+        'Sarkari Naukri',
+        'Sarkari Job',
+        'Government Jobs 2025',
+        'Free Job Alert 2025',
+        'saarkariresult.com Sarkari Naukri',
+        'saarkariresult.com Sarkari Result',
+        'Bank Recruitment 2025',
+        'Railway Recruitment 2025',
+        'saarkariresult.com',
+        'Sarkari Exam Portal',
+        'saarkariresult.com Admit Card',
+        'saarkariresult.com Answer Keys',
+        'SSC Recruitment 2025',
+        'UPSC Exam Notifications 2025',
+        'Police Recruitment 2025',
+        'Defence Recruitment 2025'
+      ],
+      tags: [
+        'sarkari result',
+        'sarkari result.com',
+        'sarkari result 2025',
+        'saarkariresult',
+        'sarkari result.in',
+        'sarkari results 2025',
+        'sarkariresult',
+        'Sarkari Result',
+        'Sarkari Results',
+        'Sarkari Result 2025',
+        'Sarkari Naukri',
+        'Sarkari Job',
+        'Government Jobs 2025',
+        'Free Job Alert 2025',
+        'saarkariresult.com Sarkari Naukri',
+        'saarkariresult.com Sarkari Result',
+        'Bank Recruitment 2025',
+        'Railway Recruitment 2025',
+        'saarkariresult.com',
+        'Sarkari Exam Portal',
+        'saarkariresult.com Admit Card',
+        'saarkariresult.com Answer Keys',
+        'SSC Recruitment 2025',
+        'UPSC Exam Notifications 2025',
+        'Police Recruitment 2025',
+        'Defence Recruitment 2025'
+      ],
       contentTitle: '',
       contentDescription: ''
     });
@@ -155,8 +263,78 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
   };
 
   const resetMetaToDefaults = () => {
-    handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025');
+    handleInputChange('metaTitle', 'Sarkari Result 2025 | Sarkari Result Jobs');
     handleInputChange('metaDescription', 'SaarkariResult.com for Sarkari Result, Sarkari Result jobs, Sarkari Result admit cards & Sarkari Result online forms. Sarkari Result 2025 live updates');
+  };
+
+  const resetKeywordsToDefaults = () => {
+    const defaultKeywords = [
+      'sarkari result',
+      'sarkari result.com',
+      'sarkari result 2025',
+      'saarkariresult',
+      'sarkari result.in',
+      'sarkari results 2025',
+      'sarkariresult',
+      'Sarkari Result',
+      'Sarkari Results',
+      'Sarkari Result 2025',
+      'Sarkari Naukri',
+      'Sarkari Job',
+      'Government Jobs 2025',
+      'Free Job Alert 2025',
+      'saarkariresult.com Sarkari Naukri',
+      'saarkariresult.com Sarkari Result',
+      'Bank Recruitment 2025',
+      'Railway Recruitment 2025',
+      'saarkariresult.com',
+      'Sarkari Exam Portal',
+      'saarkariresult.com Admit Card',
+      'saarkariresult.com Answer Keys',
+      'SSC Recruitment 2025',
+      'UPSC Exam Notifications 2025',
+      'Police Recruitment 2025',
+      'Defence Recruitment 2025'
+    ];
+    setFormData(prev => ({ ...prev, keywords: defaultKeywords }));
+    if (errors.keywords) {
+      setErrors(prev => ({ ...prev, keywords: '' }));
+    }
+  };
+
+  const resetTagsToDefaults = () => {
+    const defaultTags = [
+      'sarkari result',
+      'sarkari result.com',
+      'sarkari result 2025',
+      'saarkariresult',
+      'sarkari result.in',
+      'sarkari results 2025',
+      'sarkariresult',
+      'Sarkari Result',
+      'Sarkari Results',
+      'Sarkari Result 2025',
+      'Sarkari Naukri',
+      'Sarkari Job',
+      'Government Jobs 2025',
+      'Free Job Alert 2025',
+      'saarkariresult.com Sarkari Naukri',
+      'saarkariresult.com Sarkari Result',
+      'Bank Recruitment 2025',
+      'Railway Recruitment 2025',
+      'saarkariresult.com',
+      'Sarkari Exam Portal',
+      'saarkariresult.com Admit Card',
+      'saarkariresult.com Answer Keys',
+      'SSC Recruitment 2025',
+      'UPSC Exam Notifications 2025',
+      'Police Recruitment 2025',
+      'Defence Recruitment 2025'
+    ];
+    setFormData(prev => ({ ...prev, tags: defaultTags }));
+    if (errors.tags) {
+      setErrors(prev => ({ ...prev, tags: '' }));
+    }
   };
 
   if (!isOpen) return null;
@@ -220,7 +398,7 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
               </label>
               <button
                 type="button"
-                onClick={() => handleInputChange('metaTitle', 'SaarkariResult.com : Sarkari Result 2025, Sarkari Results, saarkariresult.com 2025 , sarkariresult 2025')}
+                onClick={() => handleInputChange('metaTitle', 'Sarkari Result 2025 | Sarkari Result Jobs')}
                 className="text-xs text-blue-600 hover:text-blue-800 underline"
               >
                 Use Default
@@ -295,9 +473,18 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 
           {/* Keywords */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Keywords *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Keywords *
+              </label>
+              <button
+                type="button"
+                onClick={resetKeywordsToDefaults}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Use Default Keywords
+              </button>
+            </div>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
@@ -344,9 +531,18 @@ const AddSubCategoryModal: React.FC<AddSubCategoryModalProps> = ({
 
           {/* Tags */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Tags *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Tags *
+              </label>
+              <button
+                type="button"
+                onClick={resetTagsToDefaults}
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+              >
+                Use Default Tags
+              </button>
+            </div>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"

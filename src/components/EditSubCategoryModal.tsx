@@ -206,33 +206,59 @@ const EditSubCategoryModal: React.FC<EditSubCategoryModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Meta Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Meta Title *
-            </label>
-            <input
-              type="text"
-              value={formData.metaTitle || ''}
-              onChange={(e) => handleInputChange('metaTitle', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                errors.metaTitle ? 'border-red-300' : 'border-gray-300'
-              }`}
-              placeholder="Enter meta title for SEO"
-              maxLength={60}
-            />
-            {errors.metaTitle && (
-              <div className="flex items-center gap-1 mt-1">
-                <AlertCircle className="w-4 h-4 text-red-500" />
-                <p className="text-sm text-red-600">{errors.metaTitle}</p>
-              </div>
-            )}
-            <p className="text-xs text-gray-500 mt-1">
-              {(formData.metaTitle || '').length}/60 characters
-            </p>
-          </div>
+                      {/* Meta Title */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Title *
+              </label>
+              <input
+                type="text"
+                value={formData.metaTitle || ''}
+                onChange={(e) => handleInputChange('metaTitle', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  errors.metaTitle ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Enter meta title for SEO"
+                maxLength={60}
+              />
+              {errors.metaTitle && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <p className="text-sm text-red-600">{errors.metaTitle}</p>
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                {(formData.metaTitle || '').length}/60 characters
+              </p>
+            </div>
 
-          {/* Content Title */}
+            {/* Meta Description */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Meta Description *
+              </label>
+              <textarea
+                value={formData.metaDescription || ''}
+                onChange={(e) => handleInputChange('metaDescription', e.target.value)}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+                  errors.metaDescription ? 'border-red-300' : 'border-gray-300'
+                }`}
+                placeholder="Enter meta description for SEO (50-160 characters)"
+                rows={3}
+                maxLength={160}
+              />
+              {errors.metaDescription && (
+                <div className="flex items-center gap-1 mt-1">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <p className="text-sm text-red-600">{errors.metaDescription}</p>
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                {(formData.metaDescription || '').length}/160 characters
+              </p>
+            </div>
+
+            {/* Content Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Content Title *
