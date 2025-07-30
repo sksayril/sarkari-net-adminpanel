@@ -1012,53 +1012,67 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     setShowToolbar(!showToolbar);
   };
 
-  // Fix cursor position issue by using a different approach
+  // Optimized content loading with debouncing and better performance
   useEffect(() => {
     if (editorRef.current && !isPreview) {
-      // Handle full HTML documents by extracting body content
-      let contentToSet = value;
-      
-      // Check if it's a full HTML document
-      if (value.includes('<!DOCTYPE html>') || value.includes('<html')) {
-        // Extract meta tags from the full HTML
-        const extractedMeta = extractMetaTags(value);
-        setMetaData(extractedMeta);
+      // Debounce content updates to prevent excessive re-renders
+      const timeoutId = setTimeout(() => {
+        let contentToSet = value;
         
-        // Create a temporary div to parse the HTML
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = value;
-        
-        // Extract content from body
-        const bodyContent = tempDiv.querySelector('body');
-        if (bodyContent) {
-          contentToSet = bodyContent.innerHTML;
-        } else {
-          // If no body tag, try to extract content after head
-          const headEnd = value.indexOf('</head>');
-          if (headEnd !== -1) {
-            const bodyStart = value.indexOf('<body');
-            if (bodyStart !== -1) {
-              const bodyEnd = value.indexOf('</body>');
-              if (bodyEnd !== -1) {
-                contentToSet = value.substring(bodyStart + 6, bodyEnd);
-              }
+        // Check if it's a full HTML document
+        if (value.includes('<!DOCTYPE html>') || value.includes('<html')) {
+          try {
+            // Extract meta tags from the full HTML
+            const extractedMeta = extractMetaTags(value);
+            setMetaData(extractedMeta);
+            
+            // Use DOMParser for better performance
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(value, 'text/html');
+            
+            // Extract content from body
+            const bodyContent = doc.querySelector('body');
+            if (bodyContent) {
+              contentToSet = bodyContent.innerHTML;
             } else {
-              // No body tag, extract everything after head
-              contentToSet = value.substring(headEnd + 7);
+              // Fallback: extract content after head
+              const headEnd = value.indexOf('</head>');
+              if (headEnd !== -1) {
+                const bodyStart = value.indexOf('<body');
+                if (bodyStart !== -1) {
+                  const bodyEnd = value.indexOf('</body>');
+                  if (bodyEnd !== -1) {
+                    contentToSet = value.substring(bodyStart + 6, bodyEnd);
+                  }
+                } else {
+                  contentToSet = value.substring(headEnd + 7);
+                }
+              }
             }
+          } catch (error) {
+            console.warn('Error parsing HTML content:', error);
+            // Fallback to original content
+            contentToSet = value;
           }
         }
-      }
-      
-      // Only update innerHTML if it's different to prevent cursor jumping
-      if (editorRef.current.innerHTML !== contentToSet) {
-        editorRef.current.innerHTML = contentToSet;
         
-        // Enhance existing tables after content is loaded
-        setTimeout(() => {
-          enhanceExistingTables();
-        }, 100);
-      }
+        // Only update if content is different
+        if (editorRef.current && editorRef.current.innerHTML !== contentToSet) {
+          // Use requestAnimationFrame for smoother updates
+          requestAnimationFrame(() => {
+            if (editorRef.current) {
+              editorRef.current.innerHTML = contentToSet;
+              
+              // Enhance tables with a slight delay for better performance
+              requestAnimationFrame(() => {
+                enhanceExistingTables();
+              });
+            }
+          });
+        }
+      }, 50); // Reduced debounce time for better responsiveness
+      
+      return () => clearTimeout(timeoutId);
     }
   }, [value, isPreview]);
 

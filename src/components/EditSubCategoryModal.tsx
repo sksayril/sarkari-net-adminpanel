@@ -21,6 +21,7 @@ const EditSubCategoryModal: React.FC<EditSubCategoryModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<UpdateSubCategoryRequest>({
     metaTitle: '',
+    metaDescription: '',
     contentTitle: '',
     contentDescription: '',
     keywords: [],
@@ -36,6 +37,7 @@ const EditSubCategoryModal: React.FC<EditSubCategoryModalProps> = ({
     if (subCategory) {
       setFormData({
         metaTitle: subCategory.metaTitle,
+        metaDescription: subCategory.metaDescription,
         contentTitle: subCategory.contentTitle,
         contentDescription: subCategory.contentDescription,
         keywords: [...subCategory.keywords],
@@ -57,6 +59,14 @@ const EditSubCategoryModal: React.FC<EditSubCategoryModalProps> = ({
       newErrors.metaTitle = 'Meta title must be at least 3 characters';
     } else if (formData.metaTitle.trim().length > 60) {
       newErrors.metaTitle = 'Meta title must be less than 60 characters';
+    }
+
+    if (!formData.metaDescription?.trim()) {
+      newErrors.metaDescription = 'Meta description is required';
+    } else if (formData.metaDescription.trim().length < 50) {
+      newErrors.metaDescription = 'Meta description must be at least 50 characters';
+    } else if (formData.metaDescription.trim().length > 160) {
+      newErrors.metaDescription = 'Meta description must be less than 160 characters';
     }
 
     if (!formData.contentTitle?.trim()) {
@@ -101,6 +111,7 @@ const EditSubCategoryModal: React.FC<EditSubCategoryModalProps> = ({
   const handleClose = () => {
     setFormData({
       metaTitle: '',
+      metaDescription: '',
       contentTitle: '',
       contentDescription: '',
       keywords: [],

@@ -1,6 +1,6 @@
 // API Configuration
 // export const API_BASE_URL = 'https://7cvccltb-3110.inc1.devtunnels.ms';
-export const API_BASE_URL = 'https://api.dhanlaxmii.com';
+export const API_BASE_URL = 'https://api.mydost.site';
 // export const API_BASE_URL = 'http://localhost:3119';
 
 // Types for API responses
@@ -134,6 +134,7 @@ export interface CreateSubCategoryRequest {
 
 export interface UpdateSubCategoryRequest {
   metaTitle?: string;
+  metaDescription?: string;
   contentTitle?: string;
   contentDescription?: string;
   keywords?: string[];
